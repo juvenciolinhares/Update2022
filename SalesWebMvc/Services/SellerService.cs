@@ -27,5 +27,11 @@ namespace SalesWebMvc.Services
         {
             return _context.Seller.ToList();//acessa a fonte de dados de vendedores e converte p lista
         }
+
+        public void Insert(Seller obj)
+        {
+            _context.Add(obj);// inserir esse obj(funcionario) no bd
+            _context.SaveChanges();//confirma/salva essa inserção
+        }
     }
 }
