@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using SalesWebMvc.Services.Exceptions;
 
 namespace SalesWebMvc.Services
 {
@@ -12,7 +13,7 @@ namespace SalesWebMvc.Services
     {
         private readonly SalesWebMvcContext _context;  //previnir que a dependencia n pode ser alterada: readonly
 
-        
+
         //construtor pra ocorrer a injeção de dependencia:
 
         public SellerService(SalesWebMvcContext context)
@@ -31,7 +32,7 @@ namespace SalesWebMvc.Services
 
         public void Insert(Seller obj)
         {
-            
+
             _context.Add(obj);// inserir esse obj(funcionario) no bd
             _context.SaveChanges();//confirma/salva essa inserção
         }
@@ -39,7 +40,7 @@ namespace SalesWebMvc.Services
         //retorna um vendendo que possui esse id ou retonar nulo, caso n exista 
         public Seller FindById(int id)
         {
-            return _context.Seller.Include(obj=> obj.Department).FirstOrDefault(obj => obj.Id == id);
+            return _context.Seller.Include(obj => obj.Department).FirstOrDefault(obj => obj.Id == id);
         }
 
         public void Remove(int id)
@@ -47,7 +48,27 @@ namespace SalesWebMvc.Services
             var obj = _context.Seller.Find(id);//encontrar/pegar obj
             _context.Seller.Remove(obj);//removeu o bj do dbset
             _context.SaveChanges();//confirmaçãoi da operação
+        }
 
+        //operação update seller:
+        public void Update(Seller obj)
+        {
+            //testar se o id ja existe
+            if (!_context.Seller.Any(x => x.Id == obj.Id))//se o id não existir:
+            {
+                throw new NotFoundException("Id not found");
+
+            }
+            try
+            {
+                _context.Update(obj);
+                _context.SaveChanges();
+            }
+            catch(DbUpdateConcurrencyException e)
+            {
+                throw new DbConcurrencyException(e.Message);
+            }
+           
         }
     }
 }

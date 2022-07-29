@@ -2,6 +2,7 @@
 using SalesWebMvc.Models;
 using SalesWebMvc.Models.ViewModels;
 using SalesWebMvc.Services;
+using SalesWebMvc.Services.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -94,6 +95,53 @@ namespace SalesWebMvc.Controllers
                 return NotFound();
             }
             return View(obj);
+        }
+
+        //ação edit: abre a tela de edição do vendedor:
+        public IActionResult Edit(int? id)
+        {
+            //testendo se o id é igual a nulo:
+            if(id == null)
+            {
+                return NotFound();
+            }
+
+            //testar se o id existe no bd:
+            var obj = _sellerService.FindById(id.Value);
+            if(obj == null)
+            {
+                return NotFound();
+            }
+
+            //abrir a tela de edição:
+            List<Department> departments = _departmentService.FindAll();
+            SellerFormViewModel viewModel = new SellerFormViewModel { Seller = obj, Departments = departments };
+            return View(viewModel);
+        }
+
+        //ação edit para o método post:
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(int id, Seller seller)
+        {
+            //testando se o id do parametro é diferente do id do vendedor
+            if(id != seller.Id)
+            {
+                return BadRequest();
+            }
+            try
+            {
+                _sellerService.Update(seller);//atualização
+                return RedirectToAction(nameof(Index));//redirecionar a requisição p a pagina inicial do crud(index)
+            }
+            catch(NotFoundException)
+            {
+                return NotFound();
+            }
+            catch(DbConcurrencyException)
+            {
+                return BadRequest();
+            }
         }
 
     }
