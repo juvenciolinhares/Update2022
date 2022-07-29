@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SalesWebMvc.Models;
+using SalesWebMvc.Models.ViewModels;
 using SalesWebMvc.Services;
 using System;
 using System.Collections.Generic;
@@ -11,14 +12,16 @@ namespace SalesWebMvc.Controllers
     public class SellersController : Controller
     {
 
-        //declarar uma dependencia de sellerservice:
+        //declarar dependencias:
         private readonly SellerService _sellerService;
+        private readonly DepartmentService _departmentService;
 
 
         //cont p injetar dependencia:
-        public SellersController(SellerService sellerService)
+        public SellersController(SellerService sellerService, DepartmentService departmentService)
         {
             _sellerService = sellerService;
+            _departmentService = departmentService;
         }
 
         public IActionResult Index()//controlador
@@ -32,7 +35,11 @@ namespace SalesWebMvc.Controllers
 
         public IActionResult Create()
         {
-            return View();
+            //carregar os depts
+            var departments = _departmentService.FindAll();//busca do bd tds depts
+
+            var viewModel = new SellerFormViewModel { Departments = departments };// inicia com a lista de depts buscada acima
+            return View(viewModel);
         }
 
         //criar a ação create que recebe o obj vendendor que veio da requisição:
