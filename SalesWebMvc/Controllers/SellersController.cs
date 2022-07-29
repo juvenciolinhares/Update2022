@@ -5,6 +5,7 @@ using SalesWebMvc.Services;
 using SalesWebMvc.Services.Exceptions;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -57,19 +58,20 @@ namespace SalesWebMvc.Controllers
         public IActionResult Delete(int? id)//o ? significa que é opcional
         {
             //1°testa se o id é nulo
-            if(id == null)
+            if (id == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Id not provided" });//id nao fornecido
             }
 
             var obj = _sellerService.FindById(id.Value);
-            if(obj ==null) {
-                return NotFound();
+            if (obj == null)
+            {
+                return RedirectToAction(nameof(Error), new { message = "Id not found" });//id nao encontrado
             }
             return View(obj);
         }
 
-       
+
         //ação de deletar seller:
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -86,13 +88,13 @@ namespace SalesWebMvc.Controllers
             //1°testa se o id é nulo
             if (id == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Id not provided" });
             }
 
             var obj = _sellerService.FindById(id.Value);
             if (obj == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Id not found" });
             }
             return View(obj);
         }
@@ -101,16 +103,16 @@ namespace SalesWebMvc.Controllers
         public IActionResult Edit(int? id)
         {
             //testendo se o id é igual a nulo:
-            if(id == null)
+            if (id == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Id not provided" });
             }
 
             //testar se o id existe no bd:
             var obj = _sellerService.FindById(id.Value);
-            if(obj == null)
+            if (obj == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Id not found" });
             }
 
             //abrir a tela de edição:
@@ -125,23 +127,32 @@ namespace SalesWebMvc.Controllers
         public IActionResult Edit(int id, Seller seller)
         {
             //testando se o id do parametro é diferente do id do vendedor
-            if(id != seller.Id)
+            if (id != seller.Id)
             {
-                return BadRequest();
+                return RedirectToAction(nameof(Error), new { message = "Id mismatch" });//id nao corresponde
             }
             try
             {
                 _sellerService.Update(seller);//atualização
                 return RedirectToAction(nameof(Index));//redirecionar a requisição p a pagina inicial do crud(index)
             }
-            catch(NotFoundException)
+            catch (ApplicationException e)//ApplicationException: genérico, pega todas as exceções
             {
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = e.Message });
             }
-            catch(DbConcurrencyException)
+
+        }
+
+        //ação de erro recebendo uma msg como parametro que retorna a view de erro
+        public IActionResult Error(string message)
+        {
+            var viewModel = new ErrorViewModel
             {
-                return BadRequest();
-            }
+                Message = message,
+                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier //pega o id interno da requisição
+
+            };
+            return View(viewModel);
         }
 
     }
