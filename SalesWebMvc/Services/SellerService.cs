@@ -25,36 +25,38 @@ namespace SalesWebMvc.Services
          * operação sícrona: vai rodar o acesso ao bd=> _context.Seller.ToList()
          * e a app vai ficar bloqueada esperando a operação terminar.
          */
-        public List<Seller> FindAll()
+        public async Task<List<Seller>> FindAllAsync()
         {
-            return _context.Seller.ToList();//acessa a fonte de dados de vendedores e converte p lista
+            return await _context.Seller.ToListAsync();//acessa a fonte de dados de vendedores e converte p lista
         }
 
-        public void Insert(Seller obj)
+        public async Task InsertAsync(Seller obj)
         {
 
             _context.Add(obj);// inserir esse obj(funcionario) no bd
-            _context.SaveChanges();//confirma/salva essa inserção
+            await _context.SaveChangesAsync();//confirma/salva essa inserção
         }
 
         //retorna um vendendo que possui esse id ou retonar nulo, caso n exista 
-        public Seller FindById(int id)
+        public async Task<Seller> FindByIdAsync(int id)
         {
-            return _context.Seller.Include(obj => obj.Department).FirstOrDefault(obj => obj.Id == id);
+            return await _context.Seller.Include(obj => obj.Department).FirstOrDefaultAsync(obj => obj.Id == id);
         }
 
-        public void Remove(int id)
+        public async Task RemoveAsync(int id)
         {
-            var obj = _context.Seller.Find(id);//encontrar/pegar obj
+            var obj = await _context.Seller.FindAsync(id);//encontrar/pegar obj
             _context.Seller.Remove(obj);//removeu o bj do dbset
-            _context.SaveChanges();//confirmaçãoi da operação
+            await _context.SaveChangesAsync();//confirmaçãoi da operação
         }
 
         //operação update seller:
-        public void Update(Seller obj)
+        public async Task UpdateAsync(Seller obj)
         {
             //testar se o id ja existe
-            if (!_context.Seller.Any(x => x.Id == obj.Id))//se o id não existir:
+            bool hasAny = await _context.Seller.AnyAsync(x => x.Id == obj.Id);
+
+            if (!hasAny)//se o id não existir:
             {
                 throw new NotFoundException("Id not found");
 
@@ -62,13 +64,13 @@ namespace SalesWebMvc.Services
             try
             {
                 _context.Update(obj);
-                _context.SaveChanges();
+               await _context.SaveChangesAsync();
             }
-            catch(DbUpdateConcurrencyException e)
+            catch (DbUpdateConcurrencyException e)
             {
                 throw new DbConcurrencyException(e.Message);
             }
-           
+
         }
     }
 }

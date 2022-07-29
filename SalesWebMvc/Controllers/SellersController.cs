@@ -26,19 +26,19 @@ namespace SalesWebMvc.Controllers
             _departmentService = departmentService;
         }
 
-        public IActionResult Index()//controlador
+        public async Task<IActionResult> Index()//controlador
         {
             //implementar a chama de sellerService.FindAll que retorna uma lista de seller
-            var list = _sellerService.FindAll();//model
+            var list = await _sellerService.FindAllAsync();//model
 
             //lista vai ser passada como arg p ser gerado uma lista 
             return View(list);//view
         }
 
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
             //carregar os depts
-            var departments = _departmentService.FindAll();//busca do bd tds depts
+            var departments = await _departmentService.FindAllAsync();//busca do bd tds depts
 
             var viewModel = new SellerFormViewModel { Departments = departments };// inicia com a lista de depts buscada acima
             return View(viewModel);
@@ -48,21 +48,21 @@ namespace SalesWebMvc.Controllers
 
         [HttpPost]//indica que essa ação é uma ação de POST
         [ValidateAntiForgeryToken]//previnir que a app sofra ataques csrf(qnd alguem aproveita a sua sessão de autentic e envia dados maliciosos)
-        public IActionResult Create(Seller seller)
+        public async Task<IActionResult> Create(Seller seller)
         {
             //testar se o seller é valido:
             if (!ModelState.IsValid)
             {
-                var departments = _departmentService.FindAll();
+                var departments = await _departmentService.FindAllAsync();
                 var viewModel = new SellerFormViewModel { Seller = seller, Departments = departments };
                 return View(viewModel);//enquanto o usuario n preencher direito o formulario isso se repete
             }
-            _sellerService.Insert(seller);//inseriu o vendedor
+            await _sellerService.InsertAsync(seller);//inseriu o vendedor
             return RedirectToAction(nameof(Index));//redirecionar a requisição p index(que mostra a tela principal do crud de vendedores )
         }
 
         //abrir uma tela de confirmação de delete, mas não deleta ainda
-        public IActionResult Delete(int? id)//o ? significa que é opcional
+        public async Task<IActionResult> Delete(int? id)//o ? significa que é opcional
         {
             //1°testa se o id é nulo
             if (id == null)
@@ -70,7 +70,7 @@ namespace SalesWebMvc.Controllers
                 return RedirectToAction(nameof(Error), new { message = "Id not provided" });//id nao fornecido
             }
 
-            var obj = _sellerService.FindById(id.Value);
+            var obj = await _sellerService.FindByIdAsync(id.Value);
             if (obj == null)
             {
                 return RedirectToAction(nameof(Error), new { message = "Id not found" });//id nao encontrado
@@ -82,15 +82,15 @@ namespace SalesWebMvc.Controllers
         //ação de deletar seller:
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            _sellerService.Remove(id);
+            await _sellerService.RemoveAsync(id);
             return RedirectToAction(nameof(Index));//redirecionar p tela inicial de listagem do CRUD
 
         }
 
         //ação detalhes:
-        public IActionResult Details(int? id)
+        public async Task<IActionResult> Details(int? id)
         {
             //1°testa se o id é nulo
             if (id == null)
@@ -98,7 +98,7 @@ namespace SalesWebMvc.Controllers
                 return RedirectToAction(nameof(Error), new { message = "Id not provided" });
             }
 
-            var obj = _sellerService.FindById(id.Value);
+            var obj = await _sellerService.FindByIdAsync(id.Value);
             if (obj == null)
             {
                 return RedirectToAction(nameof(Error), new { message = "Id not found" });
@@ -107,7 +107,7 @@ namespace SalesWebMvc.Controllers
         }
 
         //ação edit: abre a tela de edição do vendedor:
-        public IActionResult Edit(int? id)
+        public async Task<IActionResult> Edit(int? id)
         {
             //testendo se o id é igual a nulo:
             if (id == null)
@@ -116,14 +116,14 @@ namespace SalesWebMvc.Controllers
             }
 
             //testar se o id existe no bd:
-            var obj = _sellerService.FindById(id.Value);
+            var obj = await _sellerService.FindByIdAsync(id.Value);
             if (obj == null)
             {
                 return RedirectToAction(nameof(Error), new { message = "Id not found" });
             }
 
             //abrir a tela de edição:
-            List<Department> departments = _departmentService.FindAll();
+            List<Department> departments = await _departmentService.FindAllAsync();
             SellerFormViewModel viewModel = new SellerFormViewModel { Seller = obj, Departments = departments };
             return View(viewModel);
         }
@@ -131,12 +131,12 @@ namespace SalesWebMvc.Controllers
         //ação edit para o método post:
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, Seller seller)
+        public async Task<IActionResult> Edit(int id, Seller seller)
         {
             //testar se o seller é valido:
             if (!ModelState.IsValid)
             {
-                var departments = _departmentService.FindAll();
+                var departments = await _departmentService.FindAllAsync();
                 var viewModel = new SellerFormViewModel { Seller = seller, Departments = departments };
                 return View(viewModel);//enquanto o usuario n preencher direito o formulario isso se repete
             }
@@ -147,7 +147,7 @@ namespace SalesWebMvc.Controllers
             }
             try
             {
-                _sellerService.Update(seller);//atualização
+               await _sellerService.UpdateAsync(seller);//atualização
                 return RedirectToAction(nameof(Index));//redirecionar a requisição p a pagina inicial do crud(index)
             }
             catch (ApplicationException e)//ApplicationException: genérico, pega todas as exceções
