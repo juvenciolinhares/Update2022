@@ -28,7 +28,7 @@ namespace SalesWebMvc.Models
             Sellers.Add(seller);
         }
 
-        public double totalSales(DateTime initial, DateTime final)
+        public double TotalSales(DateTime initial, DateTime final)
         {
             /*implementar utilizando o link
              * 1°: exporta link;
