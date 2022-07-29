@@ -52,6 +52,33 @@ namespace SalesWebMvc.Controllers
             return RedirectToAction(nameof(Index));//redirecionar a requisição p index(que mostra a tela principal do crud de vendedores )
         }
 
+        //abrir uma tela de confirmação de delete, mas não deleta ainda
+        public IActionResult Delete(int? id)//o ? significa que é opcional
+        {
+            //1°testa se o id é nulo
+            if(id == null)
+            {
+                return NotFound();
+            }
+
+            var obj = _sellerService.FindById(id.Value);
+            if(obj ==null) {
+                return NotFound();
+            }
+            return View(obj);
+        }
+
+       
+        //ação de deletar seller:
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Delete(int id)
+        {
+            _sellerService.Remove(id);
+            return RedirectToAction(nameof(Index));//redirecionar p tela inicial de listagem do CRUD
+
+        }
+
     }
 }
 /*mvc acontecendo nas linhas:
