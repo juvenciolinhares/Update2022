@@ -79,6 +79,23 @@ namespace SalesWebMvc.Controllers
 
         }
 
+        //ação detalhes:
+        public IActionResult Details(int? id)
+        {
+            //1°testa se o id é nulo
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var obj = _sellerService.FindById(id.Value);
+            if (obj == null)
+            {
+                return NotFound();
+            }
+            return View(obj);
+        }
+
     }
 }
 /*mvc acontecendo nas linhas:
