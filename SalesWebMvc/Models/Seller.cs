@@ -11,6 +11,7 @@ namespace SalesWebMvc.Models
         public DateTime BirthDate { get; set; }
         public double BaseSalary { get; set; }
         public Department Department { get; set; }//implementar department em seller
+        public int DepartmentId { get; set; }// garante a existencia do id
         public ICollection<SalesRecord> Sales { get; set; } = new List<SalesRecord>(); //associação de salesrecord com sales
 
         //construtor vazio por conta do framework
