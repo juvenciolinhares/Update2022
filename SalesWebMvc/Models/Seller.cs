@@ -8,21 +8,31 @@ namespace SalesWebMvc.Models
     public class Seller
     {
         public int Id { get; set; }
+
+        //costumizar/validar o nome
+        [Required(ErrorMessage ="{0} required")]//campo obrigatório
+        [StringLength(60, MinimumLength = 3, ErrorMessage ="{0} size should be between {2} and {1}")]//qtd de carac do nome
         public string Name { get; set; }
-      
-        //custmiza o email como um link pra ja enviar o email
-        [DataType(DataType.EmailAddress)]
+
+
+        //custmizar/validar o email:
+        [Required(ErrorMessage = "{0} required")]//campo obrigatório
+        [EmailAddress(ErrorMessage ="Enter a valid email")]
+        [DataType(DataType.EmailAddress)] //email como um link pra ja enviar o email
         public string Email { get; set; }
 
-
-        //customização dos labels:
-        [Display(Name = "Birth Date")]
-        [DataType(DataType.Date)]
-        [DisplayFormat(DataFormatString ="{0:dd/MM/yyyy}")]
+        //customizar/validar a data:
+        [Required(ErrorMessage = "{0} required")]//campo obrigatório
+        [Display(Name = "Birth Date")]//Birth Date separado
+        [DataType(DataType.Date)]//sem aparecer as horas
+        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}")]//dia/mes/ano
         public DateTime BirthDate { get; set; }
 
-        [Display(Name = "Base salary")]
-        [DisplayFormat(DataFormatString ="{0:F2}")]
+        //customizar/validar o salário:
+        [Required(ErrorMessage = "{0} required")]//campo obrigatório
+        [Range(100.0, 50000.0, ErrorMessage ="{0} nuste be form {1} to {2}")]//salario: minimo 100 e mais 50000
+        [Display(Name = "Base salary")]//Base salary separado
+        [DisplayFormat(DataFormatString = "{0:F2}")]// duas casas decimais depois do ponto
         public double BaseSalary { get; set; }
         public Department Department { get; set; }//implementar department em seller
         public int DepartmentId { get; set; }// garante a existencia do id

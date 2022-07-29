@@ -50,6 +50,13 @@ namespace SalesWebMvc.Controllers
         [ValidateAntiForgeryToken]//previnir que a app sofra ataques csrf(qnd alguem aproveita a sua sessão de autentic e envia dados maliciosos)
         public IActionResult Create(Seller seller)
         {
+            //testar se o seller é valido:
+            if (!ModelState.IsValid)
+            {
+                var departments = _departmentService.FindAll();
+                var viewModel = new SellerFormViewModel { Seller = seller, Departments = departments };
+                return View(viewModel);//enquanto o usuario n preencher direito o formulario isso se repete
+            }
             _sellerService.Insert(seller);//inseriu o vendedor
             return RedirectToAction(nameof(Index));//redirecionar a requisição p index(que mostra a tela principal do crud de vendedores )
         }
@@ -126,6 +133,13 @@ namespace SalesWebMvc.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Edit(int id, Seller seller)
         {
+            //testar se o seller é valido:
+            if (!ModelState.IsValid)
+            {
+                var departments = _departmentService.FindAll();
+                var viewModel = new SellerFormViewModel { Seller = seller, Departments = departments };
+                return View(viewModel);//enquanto o usuario n preencher direito o formulario isso se repete
+            }
             //testando se o id do parametro é diferente do id do vendedor
             if (id != seller.Id)
             {
